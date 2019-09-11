@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Email Visualization</title>
+	</head>
+
+	<body class="docs framebox_body">
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript">
+
+		google.load('visualization', '1.1', {packages: ['corechart']});
+		google.setOnLoadCallback(drawExample5);
+
+		function drawExample5() 
+		{
+			var options = 
+			{
+				//width: 500,
+				//height: 1000,
+				title: 'Emails Received by Hour',
+				colors: ['blue', 'orange'],
+				areaOpacity: 0.1,
+				legend: {position: 'none'},
+				animation: 
+				{
+					duration: 1000,
+					easing: 'inAndOut'
+				},
+				hAxis: {title: 'Hour', viewWindow: {min:0, max:24}},
+				vAxis: {title: 'Emails'},
+				isStacked: true
+			};
+
+			var chart = new google.visualization.SteppedAreaChart(
+			document.getElementById('example5-visualization'));
+						
+			var data;
+			drawVisualization();
+			
+    function drawVisualization() {
+      // To see the data that this visualization uses, browse to
+      // http://spreadsheets.google.com/ccc?key=pCQbetd-CptGXxxQIG7VFIQ
+      var query = new google.visualization.Query('https://docs.google.com/spreadsheet/pub?key=0Ap_Vc0-bB221dEV5MTZyNVNQR1A0TEdWOWNUN2RneEE&range=A1:C25&pub=1');
+    
+      // Send the query with a callback function.
+      query.send(handleQueryResponse);
+    }
+    
+    function handleQueryResponse(response) {
+      if (response.isError()) {
+        alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+        return;
+      }			
+		data = response.getDataTable(); 	
+      
+      
+      
+var lineChartOptions = {title: 'Types of Email by Hour', hAxis: {title: 'Hour', viewWindow: {min:0, max:24}}, colors: ['blue', 'orange'], animation:{duration: 1000, easing: 'inAndOut'}};
+var lineChart = new google.visualization.LineChart(document.getElementById('lineChartVisualization'));
+lineChart.draw(data, lineChartOptions);
+						
+			var prevButton = document.getElementById('example5-b1');
+			var nextButton = document.getElementById('example5-b2');
+			var changeZoomButton = document.getElementById('example5-b3');
+			
+			function drawChart() 
+			{
+				// Disabling the button while the chart is drawing.
+				prevButton.disabled = true;
+				nextButton.disabled = true;
+				changeZoomButton.disabled = true;
+				google.visualization.events.addListener(chart, 'ready', function() 
+				{
+					prevButton.disabled = options.hAxis.viewWindow.min <= 0;
+					nextButton.disabled = options.hAxis.viewWindow.max >= 24;
+					changeZoomButton.disabled = false;
+				});
+				chart.draw(data, options);
+				lineChart.draw(data, lineChartOptions);
+			}
+
+			prevButton.onclick = function() 
+			{
+				options.hAxis.viewWindow.min -= 1;
+				options.hAxis.viewWindow.max -= 1;
+				lineChartOptions.hAxis.viewWindow.min -=1;
+				lineChartOptions.hAxis.viewWindow.max -=1;
+				drawChart();
+				
+				
+			}
+			nextButton.onclick = function() 
+			{
+				options.hAxis.viewWindow.min += 1;
+				options.hAxis.viewWindow.max += 1;
+				lineChartOptions.hAxis.viewWindow.min +=1;
+				lineChartOptions.hAxis.viewWindow.max +=1;
+				drawChart();
+			}
+			var zoomed = false;
+			changeZoomButton.onclick = function() 
+			{
+				if (zoomed) 
+				{
+					options.hAxis.viewWindow.min = 0;
+					options.hAxis.viewWindow.max = 3;
+					//options.colors = ['blue', 'orange'];
+					//options.connectSteps = true;
+					//options.areaOpacity = 0.3;
+					//options.legend = {position: 'right'};
+					
+					lineChartOptions.hAxis.viewWindow.min = 0;
+					lineChartOptions.hAxis.viewWindow.max = 3;
+				} 
+				else 
+				{
+					options.hAxis.viewWindow.min = 0;
+					options.hAxis.viewWindow.max = 24;
+					//options.colors = ['grey'];
+					//options.connectSteps = false;
+					//options.areaOpacity = 1.0;
+					//options.legend = {position: 'none'};
+					
+					lineChartOptions.hAxis.viewWindow.min = 0;
+					lineChartOptions.hAxis.viewWindow.max = 24;
+				}
+				zoomed = !zoomed;
+				drawChart();
+			}
+			 drawChart();
+		}
+	}
+	</script>
+
+<form>
+  <input id="example5-b1" type="button" value="Previous Hour" disabled="true"></input>
+  <input id="example5-b2" type="button" value="Next Hour" disabled="true"></input>
+  <input id="example5-b3" type="button" value="Change Zoom"></input>
+</form>
+<div id="example5-visualization"></div>
+<div id="lineChartVisualization"></div>
+
+</body>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Email Visualization</title>
+	</head>
+
+	<body class="docs framebox_body">
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript">
+
+		google.load('visualization', '1.1', {packages: ['corechart']});
+		//google.setOnLoadCallback(drawExample5);
+
+  		function drawVisualization() 
+  		{
+	    	var query = new google.visualization.Query('https://docs.google.com/spreadsheet/pub?key=0Ap_Vc0-bB221dEV5MTZyNVNQR1A0TEdWOWNUN2RneEE&range=A1:C25&pub=1');
+    		query.send(handleQueryResponse);
+		}
+    	function handleQueryResponse(response) 
+    	{
+      		if (response.isError()) 
+      		{
+        		alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+	        	return;
+      		}
+    		var data = response.getDataTable();
+  			var options = 
+  			{
+    			width: 1200, height: 700,
+    			title: 'Title',
+   			 	vAxis: {title: '# of Email'},
+    			isStacked: true
+	  		};
+      		visualization = new google.visualization.SteppedAreaChart(document.getElementById('visualization'));
+      		visualization.draw(data, options);
+      		
+      		
+      		var prevButton = document.getElementById('example5-b1');
+			var nextButton = document.getElementById('example5-b2');
+			var changeZoomButton = document.getElementById('example5-b3');
+			
+			function drawChart() 
+			{
+				// Disabling the button while the chart is drawing.
+				prevButton.disabled = true;
+				nextButton.disabled = true;
+				changeZoomButton.disabled = true;
+				google.visualization.events.addListener(visualization, 'ready', function() 
+				{
+					prevButton.disabled = options.hAxis.viewWindow.min <= 0;
+					nextButton.disabled = options.hAxis.viewWindow.max >= MAX;
+					changeZoomButton.disabled = false;
+				});
+				visualization.draw(data, options);
+			}
+
+			prevButton.onclick = function() 
+			{
+				options.hAxis.viewWindow.min -= 1;
+				options.hAxis.viewWindow.max -= 1;
+				drawChart();
+			}
+			nextButton.onclick = function() 
+			{
+				options.hAxis.viewWindow.min += 1;
+				options.hAxis.viewWindow.max += 1;
+				drawChart();
+			}
+			var zoomed = false;
+			changeZoomButton.onclick = function() 
+			{
+				if (zoomed) 
+				{
+					options.hAxis.viewWindow.min = 0;
+					options.hAxis.viewWindow.max = 3;
+					options.colors = ['blue', 'orange'];
+					//options.connectSteps = true;
+					options.areaOpacity = 0.3;
+					options.legend = {position: 'right'};
+				} 
+				else 
+				{
+					options.hAxis.viewWindow.min = 0;
+					options.hAxis.viewWindow.max = MAX;
+					options.colors = ['grey'];
+					//options.connectSteps = false;
+					options.areaOpacity = 1.0;
+					options.legend = {position: 'none'};
+				}
+				zoomed = !zoomed;
+				drawChart();
+			}
+			drawChart();
+    	}
+	</script>
+
+<form>
+  <input id="example5-b1" type="button" value="Previous Hour" disabled="true"></input>
+  <input id="example5-b2" type="button" value="Next Hour" disabled="true"></input>
+  <input id="example5-b3" type="button" value="Change Zoom"></input>
+</form>
+<div id="visualization"></div>
+
+</body>
